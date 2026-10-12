@@ -1,0 +1,40 @@
+digraph Deployment {
+    graph [label="Будущее 2.0 — автоматизация развёртывания учебного стенда",
+        labelloc=t, fontname="Noto Sans", fontsize=18,
+        rankdir=TB, nodesep=0.5, ranksep=0.6, pad=0.25, bgcolor="white"];
+    node [shape=component, style=filled, fillcolor="#E7F0FA", fontname="Noto Sans", fontsize=11, margin="0.15,0.1"];
+    edge [fontname="Noto Sans", fontsize=10, color="#555555", arrowsize=0.7];
+
+    prerequisites [fillcolor="#FFF2CC", label="Вручную до запуска\nОблако, каталог, доступ аккаунта\nSSH-ключ и IP администратора"];
+    terraform [fillcolor="#FFF2CC", label="Terraform CLI\nРучной запуск init → plan → apply"];
+    admin [shape=box, fillcolor="white", label="Администратор"];
+    internet [shape=ellipse, fillcolor="white", label="Интернет"];
+
+    subgraph cluster_terraform {
+        label="Управляет Terraform | ru-central1-d";
+        fontname="Noto Sans";
+        color="#7B9BBE";
+
+        network [label="VPC Network"];
+        subnet [label="Subnet public\n10.40.1.0/24"];
+        sg [label="Security Group\nВход: TCP 22 с admin_cidr\nВыход: разрешён"];
+        app [label="VM app — Ubuntu 22.04\n2 vCPU, 4 ГБ RAM\nДинамический публичный IPv4\nnat = true"];
+        boot [shape=cylinder, label="Boot disk\nHDD 8 ГБ"];
+        data [shape=cylinder, label="Disk data\nHDD 1 ГБ"];
+
+        network -> subnet;
+        network -> sg;
+        subnet -> app [label="Сетевой интерфейс"];
+        sg -> app [style=dashed, label="Правила доступа"];
+        app -> boot [label="ОС и программы"];
+        app -> data [label="Тестовые данные"];
+    }
+
+    software [fillcolor="#FFF2CC", label="Вручную после apply\nФайловая система и монтирование диска данных\nJava, Camel и ClickHouse на одной VM\nPower BI и отчёты настраиваются отдельно"];
+
+    prerequisites -> terraform [label="Параметры доступа"];
+    terraform -> network [label="Создание ресурсов по main.tf"];
+    admin -> app [label="SSH TCP 22\nс разрешённого IP"];
+    app -> internet [label="Публичный NAT\nдля загрузки пакетов"];
+    app -> software [style=dashed, label="Установка и настройка"];
+}

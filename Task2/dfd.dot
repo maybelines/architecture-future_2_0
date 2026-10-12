@@ -1,0 +1,67 @@
+digraph DFD {
+    graph [
+        label="Будущее 2.0 — потоки данных между доменами\nDFD целевой системы, уровень 1",
+        labelloc=t, fontname="Noto Sans", fontsize=20,
+        rankdir=TB, nodesep=0.6, ranksep=0.9, pad=0.3,
+        bgcolor="white"
+    ];
+    node [fontname="Noto Sans", fontsize=12, color="#444444", margin="0.16,0.12"];
+    edge [fontname="Noto Sans", fontsize=10, color="#555555", arrowsize=0.7];
+
+    staff [shape=box, label="Сотрудник клиники\nили головного офиса"];
+    user [shape=box, label="Бизнес-пользователь"];
+    client [shape=box, label="Клиент финтех-сервиса"];
+    pharma [shape=box, label="Система фармкомпании\n(будущий домен)"];
+    equipment [shape=box, label="Система производителя\nмедоборудования\n(будущий домен)"];
+
+    node [shape=ellipse, style=filled, fillcolor="#E7F0FA"];
+    med [label="1. Вести приём\nи учитывать услуги\n[Медицина]"];
+    fin [label="2. Обрабатывать\nфинансовые операции\n[Финтех]"];
+    ai [label="3. Анализировать\nмедицинские данные\n[ИИ]"];
+    office [label="4. Управлять ресурсами\nи закупками\n[Головной офис]"];
+    analytics [label="5. Подготавливать данные\nи выдавать отчёты\n[Аналитика]"];
+
+    node [shape=plain, style=""];
+    med_data [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="8"><TR><TD SIDES="TB">D1. Медицинские данные<BR/>и снимки</TD></TR></TABLE>>];
+    fin_data [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="8"><TR><TD SIDES="TB">D2. Финансовые данные</TD></TR></TABLE>>];
+    ai_data [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="8"><TR><TD SIDES="TB">D3. Задания и результаты ИИ</TD></TR></TABLE>>];
+    office_data [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="8"><TR><TD SIDES="TB">D4. Данные головного офиса</TD></TR></TABLE>>];
+    analytics_data [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="8"><TR><TD SIDES="TB">D5. Аналитическое хранилище<BR/>и отчётные витрины<BR/>(без клинических сведений)</TD></TR></TABLE>>];
+
+    staff -> med [label="Данные приёма\nи оказанных услуг"];
+    med -> staff [label="Медкарта, результат ИИ,\nстатус оплаты"];
+    med -> med_data [label="Карты, услуги,\nрезультаты ИИ"];
+    med_data -> med [label="История пациента,\nснимки"];
+
+    med -> ai [label="С2а: задание и снимок\nпо временной ссылке"];
+    ai -> med [label="С2а: номер задания,\nрезультат анализа"];
+    ai -> ai_data [label="Задания и результаты"];
+    ai_data -> ai [label="Состояние обработки"];
+
+    med -> fin [label="С2б: заявка на оплату\n(номер заказа, сумма)"];
+    fin -> med [label="С2б: статус оплаты"];
+    client -> fin [label="Данные клиента,\nподтверждение оплаты"];
+    fin -> client [label="Счёт и результат оплаты"];
+    fin -> fin_data [label="Счета и платежи"];
+    fin_data -> fin [label="Состояние счёта"];
+
+    staff -> office [label="Кадровые данные,\nзаявки на закупку"];
+    office -> staff [label="Наличие ресурсов,\nстатусы поставок"];
+    office -> office_data [label="Персонал, запасы,\nзатраты"];
+    office_data -> office [label="Остатки и бюджет"];
+    office -> pharma [label="С3: заказы лекарств"];
+    pharma -> office [label="С3: каталог,\nсведения о поставке"];
+    office -> equipment [label="С3: заявки на покупку\nи обслуживание"];
+    equipment -> office [label="С3: каталог, паспорта,\nстатусы обслуживания"];
+
+    med -> analytics [label="Число услуг и выручка\nбез данных пациентов"];
+    fin -> analytics [label="Финансовые показатели"];
+    ai -> analytics [label="Использование и затраты\nбез результатов анализа"];
+    office -> analytics [label="Расходы и запасы"];
+    pharma -> analytics [label="Показатели выручки\nи поставок"];
+    equipment -> analytics [label="Показатели продаж\nи обслуживания"];
+    analytics -> analytics_data [label="Проверенные данные\nи расчётные витрины"];
+    analytics_data -> analytics [label="Данные для отчётов"];
+    user -> analytics [label="С1: параметры отчёта"];
+    analytics -> user [label="С1: отчёт в пределах\nправ доступа"];
+}
